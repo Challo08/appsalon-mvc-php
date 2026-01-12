@@ -29,8 +29,8 @@ class Email
         $mail->Port       = $_ENV['EMAIL_PORT'];
 
         // 🔎 DEPURACIÓN (quítalo cuando ya funcione)
-        $mail->SMTPDebug  = 0;
-        $mail->Debugoutput = 'error_log';
+        // $mail->SMTPDebug  = 0;
+        // $mail->Debugoutput = 'error_log';
 
         $mail->CharSet = 'UTF-8';
         $mail->isHTML(true);
