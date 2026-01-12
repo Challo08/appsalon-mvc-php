@@ -30,9 +30,7 @@ class Email
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port       = $_ENV['EMAIL_PORT'];
 
-        // 🔍 DEBUG (quítalo en producción)
-        $mail->SMTPDebug = 2;
-        $mail->Debugoutput = 'error_log';
+
 
         $mail->CharSet = 'UTF-8';
         $mail->isHTML(true);
