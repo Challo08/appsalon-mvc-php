@@ -3,6 +3,7 @@
 namespace Clases;
 
 use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
 class Email
 {
@@ -14,67 +15,79 @@ class Email
     {
         $this->email = $email;
         $this->nombre = $nombre;
-        $this->token = $token;
+        $this->token  = $token;
+    }
+
+    private function configurarSMTP(PHPMailer $mail)
+    {
+        $mail->isSMTP();
+        $mail->Host       = $_ENV['EMAIL_HOST'];
+        $mail->SMTPAuth   = true;
+        $mail->Username   = $_ENV['EMAIL_USER'];
+        $mail->Password   = $_ENV['EMAIL_PASS'];
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port       = $_ENV['EMAIL_PORT'];
+
+        // 🔍 DEBUG (quítalo en producción)
+        $mail->SMTPDebug = 2;
+        $mail->Debugoutput = 'error_log';
+
+        $mail->CharSet = 'UTF-8';
+        $mail->isHTML(true);
+
+        // FROM válido (correo registrado en Brevo)
+        $mail->setFrom('challo2341@gmail.com', 'Tendencia Peluqueria');
     }
 
     public function enviarConfirmacion()
     {
-        // Crear el objeto del email
-        $mail = new PHPMailer();
-        $mail->isSMTP();
-        $mail->Host = $_ENV['EMAIL_HOST'];
-        $mail->SMTPAuth = true;
-        $mail->Username = $_ENV['EMAIL_USER'];
-        $mail->Password = $_ENV['EMAIL_PASS'];
-        $mail->SMTPSecure = 'tls';
-        $mail->Port = $_ENV['EMAIL_PORT'];
+        $mail = new PHPMailer(true);
 
-        $mail->setFrom('challo2341@gmail.com');
-        $mail->addAddress($this->email, $this->nombre);
-        $mail->Subject = 'Confirma tu cuenta';
+        try {
+            $this->configurarSMTP($mail);
 
-        // Set HTML
-        $mail->isHTML(true);
-        $mail->CharSet = 'UTF-8';
+            $mail->addAddress($this->email);
+            $mail->Subject = 'Confirma tu cuenta';
 
-        $contenido = "<html>";
-        $contenido .= "<p><strong>Hola " . $this->email . "</strong> Has creado tu cuenta en App Salon, solo debes confirmarla presionando en el siguiente enlace:</p>";
-        $contenido .= "<p>Presiona Aquí: <a href='" . $_ENV['APP_URL'] . "/confirmar-cuenta?token=" . $this->token . "'>Confirmar Cuenta</a> </p>";
-        $contenido .= "<p>Si tu no solicitaste esta cuenta, puedes ignorar el mensaje</p>";
-        $contenido .= "</html>";
-        $mail->Body = $contenido;
+            $contenido  = "<html>";
+            $contenido .= "<p><strong>Hola {$this->nombre}</strong>, has creado tu cuenta en App Salon.</p>";
+            $contenido .= "<p>Confirma tu cuenta aquí:</p>";
+            $contenido .= "<p><a href='{$_ENV['APP_URL']}/confirmar-cuenta?token={$this->token}'>Confirmar Cuenta</a></p>";
+            $contenido .= "<p>Si no solicitaste esta cuenta, ignora este mensaje.</p>";
+            $contenido .= "</html>";
 
-        $mail->send();
+            $mail->Body = $contenido;
+
+            return $mail->send();
+        } catch (Exception $e) {
+            error_log("Error Email Confirmación: " . $mail->ErrorInfo);
+            return false;
+        }
     }
-
 
     public function enviarInstrucciones()
     {
-        // Crear el objeto del email
-        $mail = new PHPMailer();
-        $mail->isSMTP();
-        $mail->Host = $_ENV['EMAIL_HOST'];
-        $mail->SMTPAuth = true;
-        $mail->Username = $_ENV['EMAIL_USER'];
-        $mail->Password = $_ENV['EMAIL_PASS'];
-        $mail->SMTPSecure = 'tls';
-        $mail->Port = $_ENV['EMAIL_PORT'];
+        $mail = new PHPMailer(true);
 
-        $mail->setFrom('challo2341@gmail.com');
-        $mail->addAddress($this->email, $this->nombre);
-        $mail->Subject = 'Reestablece tu Password';
+        try {
+            $this->configurarSMTP($mail);
 
-        // Set HTML
-        $mail->isHTML(true);
-        $mail->CharSet = 'UTF-8';
+            $mail->addAddress($this->email);
+            $mail->Subject = 'Restablece tu contraseña';
 
-        $contenido = "<html>";
-        $contenido .= "<p><strong>Hola " . $this->nombre . "</strong> Has solicitado reestablecer tu password, sigue el siguiente enlace para hacerlo: </p>";
-        $contenido .= "<p>Presiona Aquí: <a href='" . $_ENV['APP_URL'] . "/recuperar?token=" . $this->token . "'>Reestablercer Password</a> </p>";
-        $contenido .= "<p>Si tu no solicitaste esta cuenta, puedes ignorar el mensaje</p>";
-        $contenido .= "</html>";
-        $mail->Body = $contenido;
+            $contenido  = "<html>";
+            $contenido .= "<p><strong>Hola {$this->nombre}</strong>, solicitaste restablecer tu contraseña.</p>";
+            $contenido .= "<p>Haz clic aquí:</p>";
+            $contenido .= "<p><a href='{$_ENV['APP_URL']}/recuperar?token={$this->token}'>Restablecer Password</a></p>";
+            $contenido .= "<p>Si no fuiste tú, ignora este mensaje.</p>";
+            $contenido .= "</html>";
 
-        $mail->send();
+            $mail->Body = $contenido;
+
+            return $mail->send();
+        } catch (Exception $e) {
+            error_log("Error Email Recuperación: " . $mail->ErrorInfo);
+            return false;
+        }
     }
 }
