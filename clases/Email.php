@@ -26,10 +26,11 @@ class Email
         $mail->Username   = $_ENV['EMAIL_USER'];
         $mail->Password   = $_ENV['EMAIL_PASS'];
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-        $mail->Port       = $_ENV['EMAIL_PORT'];
+        $mail->Port       = (int) $_ENV['EMAIL_PORT'];
 
         $mail->CharSet = 'UTF-8';
         $mail->isHTML(true);
+        $mail->Timeout = 30;
 
         // FROM debe ser el mismo correo de Gmail
         $mail->setFrom($_ENV['EMAIL_USER'], 'Tendencia Peluqueria');
