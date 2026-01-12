@@ -29,7 +29,7 @@ class Email
         $mail->SMTPSecure = 'tls';
         $mail->Port = $_ENV['EMAIL_PORT'];
 
-        $mail->setFrom($this->email);
+        $mail->setFrom('challo2341@gmail.com');
         $mail->addAddress($this->email, $this->nombre);
         $mail->Subject = 'Confirma tu cuenta';
 
@@ -60,7 +60,7 @@ class Email
         $mail->SMTPSecure = 'tls';
         $mail->Port = $_ENV['EMAIL_PORT'];
 
-        $mail->setFrom($this->email);
+        $mail->setFrom('challo2341@gmail.com');
         $mail->addAddress($this->email, $this->nombre);
         $mail->Subject = 'Reestablece tu Password';
 
