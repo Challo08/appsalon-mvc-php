@@ -5,8 +5,6 @@ namespace Clases;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-require 'vendor/autoload.php';
-
 class Email
 {
     public $email;
@@ -15,7 +13,7 @@ class Email
 
     public function __construct($email, $nombre, $token)
     {
-        $this->email = $email;
+        $this->email  = $email;
         $this->nombre = $nombre;
         $this->token  = $token;
     }
@@ -30,13 +28,15 @@ class Email
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port       = $_ENV['EMAIL_PORT'];
 
-
+        // 🔎 DEPURACIÓN (quítalo cuando ya funcione)
+        $mail->SMTPDebug  = 0;
+        $mail->Debugoutput = 'error_log';
 
         $mail->CharSet = 'UTF-8';
         $mail->isHTML(true);
 
-        // FROM válido (correo registrado en Brevo)
-        $mail->setFrom('challo2341@gmail.com', 'Tendencia Peluqueria');
+        // FROM debe ser el mismo correo de Gmail
+        $mail->setFrom($_ENV['EMAIL_USER'], 'Tendencia Peluqueria');
     }
 
     public function enviarConfirmacion()
@@ -46,21 +46,23 @@ class Email
         try {
             $this->configurarSMTP($mail);
 
-            $mail->addAddress($this->email);
+            $mail->addAddress($this->email, $this->nombre);
             $mail->Subject = 'Confirma tu cuenta';
 
-            $contenido  = "<html>";
-            $contenido .= "<p><strong>Hola {$this->nombre}</strong>, has creado tu cuenta en App Salon.</p>";
-            $contenido .= "<p>Confirma tu cuenta aquí:</p>";
-            $contenido .= "<p><a href='{$_ENV['APP_URL']}/confirmar-cuenta?token={$this->token}'>Confirmar Cuenta</a></p>";
-            $contenido .= "<p>Si no solicitaste esta cuenta, ignora este mensaje.</p>";
-            $contenido .= "</html>";
-
-            $mail->Body = $contenido;
+            $mail->Body = "
+                <p><strong>Hola {$this->nombre}</strong></p>
+                <p>Has creado tu cuenta en App Salon.</p>
+                <p>
+                    <a href='{$_ENV['APP_URL']}/confirmar-cuenta?token={$this->token}'>
+                        Confirmar Cuenta
+                    </a>
+                </p>
+                <p>Si no solicitaste esta cuenta, ignora este mensaje.</p>
+            ";
 
             return $mail->send();
         } catch (Exception $e) {
-            error_log("Error Email Confirmación: " . $mail->ErrorInfo);
+            error_log('Email confirmación error: ' . $mail->ErrorInfo);
             return false;
         }
     }
@@ -72,21 +74,23 @@ class Email
         try {
             $this->configurarSMTP($mail);
 
-            $mail->addAddress($this->email);
-            $mail->Subject = 'Restablece tu contraseña';
+            $mail->addAddress($this->email, $this->nombre);
+            $mail->Subject = 'Restablecer contraseña';
 
-            $contenido  = "<html>";
-            $contenido .= "<p><strong>Hola {$this->nombre}</strong>, solicitaste restablecer tu contraseña.</p>";
-            $contenido .= "<p>Haz clic aquí:</p>";
-            $contenido .= "<p><a href='{$_ENV['APP_URL']}/recuperar?token={$this->token}'>Restablecer Password</a></p>";
-            $contenido .= "<p>Si no fuiste tú, ignora este mensaje.</p>";
-            $contenido .= "</html>";
-
-            $mail->Body = $contenido;
+            $mail->Body = "
+                <p><strong>Hola {$this->nombre}</strong></p>
+                <p>Solicitaste restablecer tu contraseña.</p>
+                <p>
+                    <a href='{$_ENV['APP_URL']}/recuperar?token={$this->token}'>
+                        Restablecer contraseña
+                    </a>
+                </p>
+                <p>Si no fuiste tú, ignora este mensaje.</p>
+            ";
 
             return $mail->send();
         } catch (Exception $e) {
-            error_log("Error Email Recuperación: " . $mail->ErrorInfo);
+            error_log('Email recuperación error: ' . $mail->ErrorInfo);
             return false;
         }
     }
