@@ -29,8 +29,8 @@ class Email
         $mail->SMTPSecure = 'tls';
         $mail->Port = $_ENV['EMAIL_PORT'];
 
-        $mail->setFrom('cuentas@appsalon.com');
-        $mail->addAddress('cuentas@appsalon.com', 'AppSalon.com');
+        $mail->setFrom('challo2341@gmail.com');
+        $mail->addAddress($this->email, $this->nombre);
         $mail->Subject = 'Confirma tu cuenta';
 
         // Set HTML
@@ -60,8 +60,8 @@ class Email
         $mail->SMTPSecure = 'tls';
         $mail->Port = $_ENV['EMAIL_PORT'];
 
-        $mail->setFrom('cuentas@appsalon.com');
-        $mail->addAddress('cuentas@appsalon.com', 'AppSalon.com');
+        $mail->setFrom('challo2341@gmail.com');
+        $mail->addAddress($this->email, $this->nombre);
         $mail->Subject = 'Reestablece tu Password';
 
         // Set HTML
