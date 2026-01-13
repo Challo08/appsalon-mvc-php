@@ -3,8 +3,10 @@
 namespace Controllers;
 
 use Model\Cita;
-use Model\CitaServicio;
+use Clases\Email;
+use Model\Usuario;
 use Model\Servicio;
+use Model\CitaServicio;
 
 class APIController
 {
@@ -27,6 +29,8 @@ class APIController
 
         //Almacena los servicios con el id de la cita
         $idServicios = explode(",", $_POST['servicios']); // Se usa explode para convertirlo a un arreglo
+        $servicios = [];
+        $total = 0;
 
         foreach ($idServicios as $idServicio) {
             $args = [
@@ -35,8 +39,29 @@ class APIController
             ];
             $citaServico = new CitaServicio($args);
             $citaServico->guardar();
+
+            // Obtener info del servicio
+            $servicio = Servicio::find($idServicio);
+            $servicios[] = $servicio;
+            $total += $servicio->precio;
         }
 
+        // 3. Obtener el usuario
+        $usuario = Usuario::find($_POST['usuarioId']);
+
+        // 4. Enviar correo de confirmación
+        $email = new Email(
+            $usuario->email,
+            $usuario->nombre,
+            null
+        );
+
+        $email->confirmarCita(
+            $_POST['fecha'],
+            $_POST['hora'],
+            $servicios,
+            $total
+        );
 
 
         echo json_encode(['resultado' => $resultado]);
