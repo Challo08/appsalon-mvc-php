@@ -33,7 +33,7 @@ class Email
         $mail->Timeout = 30;
 
         // FROM debe ser el mismo correo de Gmail
-        $mail->setFrom('challo2341@gmail.com', 'Tendencia Peluqueria');
+        $mail->setFrom('tendencia01@tendencia-peluqueria.online', 'Tendencia Peluqueria');
     }
 
     public function enviarConfirmacion()
