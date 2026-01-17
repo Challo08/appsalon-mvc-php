@@ -130,28 +130,58 @@ class Email
 
             <hr>
 
-            <p>
-                Puedes ver más detalles ingresando a nuestra plataforma:
-            </p>
-
-            <p>
-                <a href='{$_ENV['APP_URL']}' style='
-                    background:#000;
-                    color:#fff;
-                    padding:10px 15px;
-                    text-decoration:none;
-                    border-radius:5px;
-                '>
-                    Ver mi cita
-                </a>
-            </p>
-
-            <p>Gracias por confiar en <strong>App Salon</strong> ✂️</p>
+            <p>Gracias por confiar en <strong>Tendencia Peluqueria</strong> ✂️</p>
         ";
 
             return $mail->send();
         } catch (Exception $e) {
             error_log('Email de confirmación de citas error: ' . $mail->ErrorInfo);
+            return false;
+        }
+    }
+
+    public function citaAgendada($fecha, $hora, $servicios, $total)
+    {
+        $mail = new PHPMailer(true);
+
+        try {
+            $this->configurarSMTP($mail);
+
+            // Correo del sistema (remitente)
+            $mail->addAddress($_ENV['EMAIL_USER'], 'Administrador App Salón');
+            $mail->Subject = 'Nueva Cita Agendada';
+
+            $listaServicios = '<ul>';
+            foreach ($servicios as $servicio) {
+                $listaServicios .= "<li>{$servicio->nombre} - $"
+                    . number_format($servicio->precio, 0, ',', '.') . "</li>";
+            }
+            $listaServicios .= '</ul>';
+
+            $mail->Body = "
+            <h2>📢 Nueva cita agendada</h2>
+
+            <p><strong>Cliente:</strong> {$this->nombre}</p>
+            <p><strong>Email del cliente:</strong> {$this->email}</p>
+
+            <h3>📋 Detalles de la cita</h3>
+            <p><strong>📅 Fecha:</strong> {$fecha}</p>
+            <p><strong>⏰ Hora:</strong> {$hora}</p>
+
+            <h4>💇 Servicios:</h4>
+            {$listaServicios}
+
+            <p><strong>💰 Total:</strong> $
+                " . number_format($total, 0, ',', '.') . "
+            </p>
+
+            <hr>
+            <p>Este correo fue generado automáticamente por App Salón.</p>
+        ";
+
+            return $mail->send();
+        } catch (Exception $e) {
+            error_log('Email de citas error: ' . $mail->ErrorInfo);
             return false;
         }
     }
