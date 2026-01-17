@@ -148,7 +148,7 @@ class Email
             $this->configurarSMTP($mail);
 
             // Correo del sistema (remitente)
-            $mail->addAddress('EMAIL_USER', 'Administrador App Salón');
+            $mail->addAddress($_ENV['EMAIL_USER'], 'Administrador App Salón');
             $mail->Subject = 'Nueva Cita Agendada';
 
             $listaServicios = '<ul>';
