@@ -33,7 +33,7 @@ class Email
         $mail->Timeout = 30;
 
         // FROM debe ser el mismo correo de Gmail
-        $mail->setFrom('tendencia01@tendencia-peluqueria.online', 'Tendencia Peluqueria');
+        $mail->setFrom($_ENV['EMAIL_USER'], 'Tendencia Peluqueria');
     }
 
     public function enviarConfirmacion()
@@ -149,7 +149,7 @@ class Email
 
             // 📩 DESTINATARIO FIJO (ADMINISTRADOR)
             $mail->addAddress(
-                'challo2341@gmail.com',
+                $_ENV['EMAIL_USER'],
                 'Administrador App Salon'
             );
 
