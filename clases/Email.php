@@ -147,9 +147,9 @@ class Email
         try {
             $this->configurarSMTP($mail);
 
-            // 📩 Correo del administrador
+            // 📩 DESTINATARIO FIJO (ADMINISTRADOR)
             $mail->addAddress(
-                $_ENV['EMAIL_USER'],
+                'challo2341@gmail.com',
                 'Administrador App Salon'
             );
 
@@ -185,12 +185,12 @@ class Email
             </p>
 
             <hr>
-            <p>Este correo fue enviado automáticamente por App Salon.</p>
+            <p>Este correo fue generado automáticamente por App Salon.</p>
         ";
 
             return $mail->send();
         } catch (Exception $e) {
-            error_log('Error citaAgendada (PROD): ' . $mail->ErrorInfo);
+            error_log('Error citaAgendada: ' . $mail->ErrorInfo);
             return false;
         }
     }
