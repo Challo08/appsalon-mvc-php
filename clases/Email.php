@@ -147,41 +147,50 @@ class Email
         try {
             $this->configurarSMTP($mail);
 
-            // Correo del sistema (remitente)
-            $mail->addAddress($_ENV['EMAIL_USER'], 'Administrador App Salón');
-            $mail->Subject = 'Nueva Cita Agendada';
+            // 📩 Correo del administrador
+            $mail->addAddress(
+                $_ENV['EMAIL_USER'],
+                'Administrador App Salon'
+            );
 
-            $listaServicios = '<ul>';
-            foreach ($servicios as $servicio) {
-                $listaServicios .= "<li>{$servicio->nombre} - $"
-                    . number_format($servicio->precio, 0, ',', '.') . "</li>";
+            $mail->Subject = '📢 Nueva cita agendada';
+
+            // Servicios
+            if (!is_array($servicios) || empty($servicios)) {
+                $listaServicios = '<p>No se registraron servicios</p>';
+            } else {
+                $listaServicios = '<ul>';
+                foreach ($servicios as $servicio) {
+                    $listaServicios .= "<li>{$servicio->nombre} - $"
+                        . number_format($servicio->precio, 0, ',', '.') . "</li>";
+                }
+                $listaServicios .= '</ul>';
             }
-            $listaServicios .= '</ul>';
 
+            // Contenido del correo
             $mail->Body = "
-            <h2>📢 Nueva cita agendada</h2>
+            <h2>📅 Nueva cita agendada</h2>
 
             <p><strong>Cliente:</strong> {$this->nombre}</p>
             <p><strong>Email del cliente:</strong> {$this->email}</p>
 
-            <h3>📋 Detalles de la cita</h3>
-            <p><strong>📅 Fecha:</strong> {$fecha}</p>
-            <p><strong>⏰ Hora:</strong> {$hora}</p>
+            <p><strong>Fecha:</strong> {$fecha}</p>
+            <p><strong>Hora:</strong> {$hora}</p>
 
-            <h4>💇 Servicios:</h4>
+            <h4>Servicios:</h4>
             {$listaServicios}
 
-            <p><strong>💰 Total:</strong> $
+            <p><strong>Total:</strong> $
                 " . number_format($total, 0, ',', '.') . "
             </p>
 
             <hr>
-            <p>Este correo fue generado automáticamente por App Salón.</p>
+            <p>Este correo fue enviado automáticamente por App Salon.</p>
         ";
 
             return $mail->send();
         } catch (Exception $e) {
-            error_log('Email de citas error: ' . $mail->ErrorInfo);
+            error_log('Error citaAgendada (PROD): ' . $mail->ErrorInfo);
             return false;
         }
     }
