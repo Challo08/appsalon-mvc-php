@@ -9,6 +9,7 @@ class Email
 {
     public $email;
     public $nombre;
+    public $apellido;
     public $token;
 
     public function __construct($email, $nombre, $token)
@@ -18,180 +19,159 @@ class Email
         $this->token  = $token;
     }
 
-    private function configurarSMTP(PHPMailer $mail)
-    {
-        $mail->isSMTP();
-        $mail->Host       = $_ENV['EMAIL_HOST'];
-        $mail->SMTPAuth   = true;
-        $mail->Username   = $_ENV['EMAIL_USER'];
-        $mail->Password   = $_ENV['EMAIL_PASS'];
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-        $mail->Port       = (int) $_ENV['EMAIL_PORT'];
-
-        $mail->CharSet = 'UTF-8';
-        $mail->isHTML(true);
-        $mail->Timeout = 30;
-
-        // FROM debe ser el mismo correo de Gmail
-        $mail->setFrom($_ENV['EMAIL_USER'], 'Tendencia Peluqueria');
-    }
-
     public function enviarConfirmacion()
     {
         $mail = new PHPMailer(true);
+        $mail->isSMTP();
+        $mail->Host = $_ENV['EMAIL_HOST'];
+        $mail->SMTPAuth = true;
+        $mail->Port = $_ENV['EMAIL_PORT'];
+        $mail->Username = $_ENV['EMAIL_USER'];
+        $mail->Password = $_ENV['EMAIL_PASS'];
 
-        try {
-            $this->configurarSMTP($mail);
+        //$mail->setFrom($_ENV['EMAIL_USER']);
+        $mail->setFrom('cuentas@appsalon.com');
+        // $mail->addAddress($this->email, $this->nombre);
+        $mail->addAddress('cuentas@appsalon.com', $this->nombre);
+        $mail->Subject = 'Confirma tu cuenta';
 
-            $mail->addAddress($this->email, $this->nombre);
-            $mail->Subject = 'Confirma tu cuenta';
+        $mail->isHTML(true);
+        $mail->CharSet = 'UTF-8';
 
-            $mail->Body = "
-                <p><strong>Hola {$this->nombre}</strong></p>
-                <p>Has creado tu cuenta en App Salon.</p>
-                <p>
-                    <a href='{$_ENV['APP_URL']}/confirmar-cuenta?token={$this->token}'>
-                        Confirmar Cuenta
-                    </a>
-                </p>
-                <p>Si no solicitaste esta cuenta, ignora este mensaje.</p>
-            ";
+        $contenido = '<html>';
+        $contenido .= "<p><strong>Hola " . $this->nombre . "</strong> Has Creado tu cuenta en App Salón, solo debes confirmarla presionando el siguiente enlace</p>";
+        $contenido .= "<p>Presiona aquí: <a href='{$_ENV['APP_URL']}/confirmar-cuenta?token={$this->token}'>Confirmar Cuenta</a>";
+        $contenido .= "<p>Si tu no solicitaste este cambio, puedes ignorar el mensaje</p>";
+        $contenido .= '</html>';
+        $mail->Body = $contenido;
 
-            return $mail->send();
-        } catch (Exception $e) {
-            error_log('Email confirmación error: ' . $mail->ErrorInfo);
-            return false;
-        }
+        //Enviar el mail
+        $mail->send();
     }
 
     public function enviarInstrucciones()
     {
+
         $mail = new PHPMailer(true);
+        $mail->isSMTP();
+        $mail->Host = $_ENV['EMAIL_HOST'];
+        $mail->SMTPAuth = true;
+        $mail->Port = $_ENV['EMAIL_PORT'];
+        $mail->Username = $_ENV['EMAIL_USER'];
+        $mail->Password = $_ENV['EMAIL_PASS'];
 
-        try {
-            $this->configurarSMTP($mail);
+        //$mail->setFrom($_ENV['EMAIL_USER']);
+        $mail->setFrom('cuentas@appsalon.com');
+        // $mail->addAddress($this->email, $this->nombre);
+        $mail->addAddress('cuentas@appsalon.com', $this->nombre);
+        $mail->Subject = 'Restablecer contraseña';
 
-            $mail->addAddress($this->email, $this->nombre);
-            $mail->Subject = 'Restablecer contraseña';
+        $mail->isHTML(true);
+        $mail->CharSet = 'UTF-8';
 
-            $mail->Body = "
-                <p><strong>Hola {$this->nombre}</strong></p>
-                <p>Solicitaste restablecer tu contraseña.</p>
-                <p>
-                    <a href='{$_ENV['APP_URL']}/recuperar?token={$this->token}'>
-                        Restablecer contraseña
-                    </a>
-                </p>
-                <p>Si no fuiste tú, ignora este mensaje.</p>
-            ";
+        $contenido = '<html>';
+        $contenido .= "<p><strong>Hola " . $this->nombre . "</strong> Solicitaste restablecer tu contraseña, solo debes presionar en el siguiente enlace</p>";
+        $contenido .= "<p>Presiona aquí: <a href='{$_ENV['APP_URL']}/recuperar?token={$this->token}'>Restablecer contraseña</a>";
+        $contenido .= "<p>Si tu no solicitaste este cambio, puedes ignorar el mensaje</p>";
+        $contenido .= '</html>';
+        $mail->Body = $contenido;
 
-            return $mail->send();
-        } catch (Exception $e) {
-            error_log('Email recuperación error: ' . $mail->ErrorInfo);
-            return false;
-        }
+        //Enviar el mail
+        $mail->send();
     }
 
     public function confirmarCita($fecha, $hora, $servicios, $total)
     {
+
         $mail = new PHPMailer(true);
+        $mail->isSMTP();
+        $mail->Host = $_ENV['EMAIL_HOST'];
+        $mail->SMTPAuth = true;
+        $mail->Port = $_ENV['EMAIL_PORT'];
+        $mail->Username = $_ENV['EMAIL_USER'];
+        $mail->Password = $_ENV['EMAIL_PASS'];
 
-        try {
-            $this->configurarSMTP($mail);
+        //$mail->setFrom($_ENV['EMAIL_USER']);
+        $mail->setFrom('cuentas@appsalon.com');
+        // $mail->addAddress($this->email, $this->nombre);
+        $mail->addAddress('cuentas@appsalon.com', $this->nombre);
+        $mail->Subject = 'Confirmación de cita - App Salón';
 
-            $mail->addAddress($this->email, $this->nombre);
-            $mail->Subject = 'Confirmación de Cita - App Salón';
+        $mail->isHTML(true);
+        $mail->CharSet = 'UTF-8';
 
+        $listaServicios = '<ul>';
+        foreach ($servicios as $servicio) {
+            $listaServicios .= "<li>{$servicio->nombre} - $"
+                . number_format($servicio->precio, 0, ',', '.') . "</li>";
+        }
+
+        $listaServicios .= '</ul>';
+
+        $contenido = '<html>';
+        $contenido .= "<p>Hola <strong>" . $this->nombre . "</strong> Tu cita ha sido <strong>confirmada exitosamente</strong></p>";
+        $contenido .= "<h3>📋 Resumen de la cita:</h3>";
+        $contenido .= "<p><strong>📅 Fecha:</strong> {$fecha}</p>";
+        $contenido .= "<p><strong>⏰ Hora:</strong> {$hora}</p>";
+        $contenido .= "<h4>💇 Servicios seleccionados:</h4>";
+        $contenido .= "{$listaServicios}";
+        $contenido .= "<p><strong>💰 Total a pagar:</strong> $" . number_format($total, 0, ',', '.') . "</p>";
+        $contenido .= "<hr>";
+        $contenido .= "<p>Gracias por confiar en <strong>Tendencia Peluqueria</strong> ✂️</p>";
+        $contenido .= '</html>';
+        $mail->Body = $contenido;
+
+        //Enviar el mail
+        $mail->send();
+    }
+
+    public function citaAgendada($fecha, $hora, $servicios, $total)
+    {
+
+        $mail = new PHPMailer(true);
+        $mail->isSMTP();
+        $mail->Host = $_ENV['EMAIL_HOST'];
+        $mail->SMTPAuth = true;
+        $mail->Port = $_ENV['EMAIL_PORT'];
+        $mail->Username = $_ENV['EMAIL_USER'];
+        $mail->Password = $_ENV['EMAIL_PASS'];
+
+        //$mail->setFrom($_ENV['EMAIL_USER']);
+        $mail->setFrom('cuentas@appsalon.com');
+        // $mail->addAddress($this->email, $this->nombre);
+        $mail->addAddress('cuentas@appsalon.com', $this->nombre);
+        $mail->Subject = '📢 Nueva cita agendada';
+
+        $mail->isHTML(true);
+        $mail->CharSet = 'UTF-8';
+
+        // Servicios
+        if (!is_array($servicios) || empty($servicios)) {
+            $listaServicios = '<p>No se registraron servicios</p>';
+        } else {
             $listaServicios = '<ul>';
             foreach ($servicios as $servicio) {
                 $listaServicios .= "<li>{$servicio->nombre} - $"
                     . number_format($servicio->precio, 0, ',', '.') . "</li>";
             }
-
             $listaServicios .= '</ul>';
-
-            // Contenido del correo
-            $mail->Body = "
-            <h2>Hola {$this->nombre} 👋</h2>
-
-            <p>Tu cita ha sido <strong>confirmada exitosamente</strong>.</p>
-
-            <h3>📋 Resumen de la cita</h3>
-
-            <p><strong>📅 Fecha:</strong> {$fecha}</p>
-            <p><strong>⏰ Hora:</strong> {$hora}</p>
-
-            <h4>💇 Servicios seleccionados:</h4>
-            {$listaServicios}
-
-            <p><strong>💰 Total a pagar:</strong> $
-                " . number_format($total, 0, ',', '.') . "
-            </p>
-
-            <hr>
-
-            <p>Gracias por confiar en <strong>Tendencia Peluqueria</strong> ✂️</p>
-        ";
-
-            return $mail->send();
-        } catch (Exception $e) {
-            error_log('Email de confirmación de citas error: ' . $mail->ErrorInfo);
-            return false;
         }
-    }
 
-    public function citaAgendada($fecha, $hora, $servicios, $total)
-    {
-        $mail = new PHPMailer(true);
+        $contenido = '<html>';
+        $contenido .= "<h2>📅 Nueva cita agendada</h2>";
+        $contenido .= "<p><strong>Cliente:</strong> {$this->nombre}</p>";
+        $contenido .= "<p><strong>Email del cliente:</strong> {$this->email}</p>";
+        $contenido .= "<p><strong>Fecha:</strong> {$fecha}</p>";
+        $contenido .= "<p><strong>Hora:</strong> {$hora}</p>";
+        $contenido .= "<h4>Servicios:</h4>";
+        $contenido .= "{$listaServicios}";
+        $contenido .= "<p><strong>Total:</strong> $" . number_format($total, 0, ',', '.') . "</p>";
+        $contenido .= "<hr>";
+        $contenido .= "<p>Este correo fue generado automáticamente por App Salon.</p>";
+        $contenido .= '</html>';
+        $mail->Body = $contenido;
 
-        try {
-            $this->configurarSMTP($mail);
-
-            // 📩 DESTINATARIO FIJO (ADMINISTRADOR)
-            $mail->addAddress(
-                $_ENV['EMAIL_USER'],
-                'Administrador App Salon'
-            );
-
-            $mail->Subject = '📢 Nueva cita agendada';
-
-            // Servicios
-            if (!is_array($servicios) || empty($servicios)) {
-                $listaServicios = '<p>No se registraron servicios</p>';
-            } else {
-                $listaServicios = '<ul>';
-                foreach ($servicios as $servicio) {
-                    $listaServicios .= "<li>{$servicio->nombre} - $"
-                        . number_format($servicio->precio, 0, ',', '.') . "</li>";
-                }
-                $listaServicios .= '</ul>';
-            }
-
-            // Contenido del correo
-            $mail->Body = "
-            <h2>📅 Nueva cita agendada</h2>
-
-            <p><strong>Cliente:</strong> {$this->nombre}</p>
-            <p><strong>Email del cliente:</strong> {$this->email}</p>
-
-            <p><strong>Fecha:</strong> {$fecha}</p>
-            <p><strong>Hora:</strong> {$hora}</p>
-
-            <h4>Servicios:</h4>
-            {$listaServicios}
-
-            <p><strong>Total:</strong> $
-                " . number_format($total, 0, ',', '.') . "
-            </p>
-
-            <hr>
-            <p>Este correo fue generado automáticamente por App Salon.</p>
-        ";
-
-            return $mail->send();
-        } catch (Exception $e) {
-            error_log('Error citaAgendada: ' . $mail->ErrorInfo);
-            return false;
-        }
+        //Enviar el mail
+        $mail->send();
     }
 }
